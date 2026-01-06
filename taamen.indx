@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تأمين 2026 - System Override FULL EDITION</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- 1. Variables & Base --- */
+        :root {
+            --bg-deep: #02020a;
+            --accent-cyan: #00f2ff;
+            --accent-green: #00ff41; 
+            --accent-gold: #ffd700;
+            --danger: #ff0040;
+            --purple-neon: #bc13fe;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --scanline-color: rgba(18, 16, 16, 0.1);
+            --transition-speed: 0.5s;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: var(--bg-deep);
+            color: white;
+            overflow-x: hidden;
+            min-height: 100vh;
+            perspective: 1200px;
+            transform-style: preserve-3d;
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent-cyan) var(--bg-deep);
+        }
+
+        /* Custom Scrollbar for Webkit */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-deep); }
+        ::-webkit-scrollbar-thumb { background: var(--accent-cyan); border-radius: 10px; }
+
+        /* --- 2. Animations Keyframes --- */
+        @keyframes glitch-anim { 
+            0% { clip: rect(31px, 9999px, 94px, 0); } 
+            20% { clip: rect(6px, 9999px, 86px, 0); } 
+            40% { clip: rect(68px, 9999px, 2px, 0); } 
+            60% { clip: rect(13px, 9999px, 63px, 0); } 
+            80% { clip: rect(98px, 9999px, 20px, 0); } 
+            100% { clip: rect(38px, 9999px, 16px, 0); } 
+        }
+        
+        @keyframes glitch-skew { 
+            0% { transform: skew(3deg); } 10% { transform: skew(-2deg); } 
+            20% { transform: skew(1deg); } 30% { transform: skew(-1deg); } 
+            40% { transform: skew(3deg); } 50% { transform: skew(-3deg); } 
+            100% { transform: skew(0deg); } 
+        }
+
+        @keyframes pulse-gold {
+            0% { box-shadow: 0 0 10px var(--accent-gold); border-color: var(--accent-gold); }
+            100% { box-shadow: 0 0 30px var(--accent-gold), 0 0 50px rgba(255, 215, 0, 0.3); border-color: white; }
+        }
+
+        @keyframes floating {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        /* --- 3. UI Components --- */
+        
+        /* Boot Screen */
+        #bootScreen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: black; z-index: 10000; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; font-family: 'Orbitron', monospace; color: var(--accent-green);
+        }
+        .boot-text-container { width: 350px; font-size: 0.9rem; line-height: 1.6; position: relative; }
+        
+        /* Home Button */
+        .home-btn {
+            position: fixed; top: 25px; right: 25px; width: 60px; height: 60px;
+            background: var(--glass-bg); border-radius: 15px; display: none;
+            justify-content: center; align-items: center; z-index: 9000; cursor: pointer;
+            backdrop-filter: blur(15px); border: 1px solid var(--glass-border);
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); font-size: 1.8rem;
+            color: white; text-shadow: 0 0 10px var(--accent-cyan);
+        }
+        .home-btn:hover { 
+            background: var(--accent-cyan); color: black; 
+            transform: scale(1.1) rotate(10deg); 
+            box-shadow: 0 0 30px var(--accent-cyan);
+        }
+
+        /* Scanlines Effect */
+        .scanlines {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(var(--scanline-color) 50%, rgba(0, 0, 0, 0) 50%);
+            background-size: 100% 4px; z-index: 8000; pointer-events: none; opacity: 0.2;
+        }
+
+        /* Canvases for Backgrounds */
+        canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+        #matrixCanvas { display: none; opacity: 0.3; }
+        #particlesCanvas { display: block; opacity: 0.6; }
+        #starCanvas { display: none; }
+
+        /* --- 4. Main Layout & Pages --- */
+        .page { 
+            display: none; padding: 40px 20px 150px; 
+            max-width: 1200px; margin: 0 auto; 
+            animation: pageReveal 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards; 
+            position: relative; z-index: 10; 
+        }
+        .page.active { display: block; }
+
+        @keyframes pageReveal {
+            from { opacity: 0; transform: translateZ(-200px) translateY(50px); filter: blur(10px); }
+            to { opacity: 1; transform: translateZ(0) translateY(0); filter: blur(0); }
+        }
+
+        /* Brand Header */
+        .brand-header { text-align: center; margin-bottom: 50px; padding-top: 60px; }
+        .year-tag { font-family: 'Orbitron'; letter-spacing: 12px; color: var(--accent-gold); font-size: 1.2rem; display: block; margin-bottom: 10px; opacity: 0.8; }
+        
+        .glitch-text {
+            font-size: 6rem; font-weight: 900; position: relative; color: white;
+            text-shadow: 0 0 20px var(--accent-cyan), 0 0 40px var(--accent-cyan);
+            animation: glitch-skew 1s infinite linear alternate-reverse;
+            font-family: 'Tajawal';
+        }
+        .glitch-text::before, .glitch-text::after {
+            content: attr(data-text); position: absolute; left: 0; width: 100%; height: 100%; opacity: 0.8;
+        }
+        .glitch-text::before { color: var(--danger); z-index: -1; animation: glitch-anim 3s infinite linear alternate-reverse; }
+        .glitch-text::after { color: var(--accent-cyan); z-index: -2; animation: glitch-anim 2s infinite linear alternate-reverse; }
+
+        /* Navigation Grid */
+        .nav-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; margin-top: 40px; }
+        
+        .menu-card {
+            background: linear-gradient(145deg, rgba(255,255,255,0.05), rgba(0,0,0,0.3));
+            border: 1px solid var(--glass-border); border-radius: 25px; padding: 40px;
+            text-align: center; transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); 
+            cursor: pointer; position: relative; overflow: hidden;
+            transform-style: preserve-3d;
+        }
+        .menu-card::before {
+            content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: 0.5s;
+        }
+        .menu-card:hover::before { left: 100%; }
+        
+        .menu-card:hover {
+            border-color: var(--accent-cyan);
+            transform: translateY(-15px) rotateX(10deg) rotateY(5deg);
+            box-shadow: 0 20px 50px rgba(0, 242, 255, 0.2);
+            background: rgba(255,255,255,0.08);
+        }
+
+        .menu-card.premium-card {
+            grid-column: 1 / -1;
+            border: 2px solid var(--accent-gold);
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.05), rgba(255, 0, 64, 0.05));
+            animation: pulse-gold 3s infinite alternate;
+        }
+
+        .card-icon { font-size: 3.5rem; margin-bottom: 20px; display: block; filter: drop-shadow(0 0 10px currentColor); }
+        .menu-card h2 { font-size: 1.8rem; margin-bottom: 10px; font-weight: 800; }
+        .menu-card p { color: #aaa; font-size: 1rem; line-height: 1.4; }
+
+        /* --- 5. Specific Page Styles --- */
+
+        /* Warriors Page (VS Arena) */
+        .vs-arena { display: flex; flex-direction: column; align-items: center; gap: 40px; margin-top: 50px; }
+        .battle-grid { display: grid; grid-template-columns: 1fr auto 1fr; gap: 40px; width: 100%; align-items: center; }
+        
+        .warrior-list { display: flex; flex-direction: column; gap: 15px; width: 100%; }
+        .warrior-card {
+            background: var(--glass-bg); border: 1px solid var(--glass-border);
+            padding: 20px 30px; border-radius: 50px; font-weight: 800; font-size: 1.3rem;
+            text-align: center; transition: 0.4s; position: relative; overflow: hidden;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .team-left .warrior-card { border-right: 5px solid var(--accent-cyan); text-align: right; flex-direction: row-reverse; }
+        .team-right .warrior-card { border-left: 5px solid var(--danger); text-align: left; }
+
+        .warrior-card:hover {
+            background: white; color: black; transform: scale(1.05) translateX(10px);
+            box-shadow: 0 0 30px white;
+        }
+        .team-left .warrior-card:hover { transform: scale(1.05) translateX(-10px); }
+
+        .vs-divider {
+            font-size: 5rem; font-weight: 900; color: var(--accent-gold);
+            font-family: 'Orbitron'; text-shadow: 0 0 30px var(--accent-gold);
+            animation: floating 3s infinite ease-in-out;
+        }
+
+        /* Stats Page */
+        .stats-wrapper { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 30px; }
+        .stats-box {
+            background: rgba(0,0,0,0.5); border: 1px solid var(--glass-border);
+            border-radius: 30px; padding: 30px; backdrop-filter: blur(10px);
+        }
+        .stats-title { font-size: 1.8rem; font-weight: 900; margin-bottom: 25px; text-align: center; color: var(--accent-cyan); }
+        
+        .data-table { width: 100%; border-collapse: separate; border-spacing: 0 10px; }
+        .data-table tr { transition: 0.3s; }
+        .data-table tr:hover { transform: scale(1.02); background: rgba(255,255,255,0.05); }
+        .data-table td { padding: 15px; background: rgba(255,255,255,0.02); }
+        .data-table td:first-child { border-radius: 15px 0 0 15px; font-weight: 800; }
+        .data-table td:last-child { border-radius: 0 15px 15px 0; text-align: center; color: var(--accent-cyan); font-family: 'Orbitron'; font-weight: 700; }
+
+        /* Injuries Page */
+        .injury-card {
+            background: linear-gradient(45deg, rgba(255,0,64,0.1), transparent);
+            border: 1px solid var(--danger); border-radius: 20px; padding: 25px;
+            margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;
+            transition: 0.4s;
+        }
+        .injury-card:hover { transform: scale(1.02); box-shadow: 0 0 20px var(--danger); }
+        .player-info h3 { font-size: 1.5rem; margin-bottom: 5px; }
+        .player-info p { color: #ccc; }
+        .status-badge {
+            padding: 8px 20px; border-radius: 50px; font-size: 0.8rem; font-weight: 900;
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+        .status-danger { background: var(--danger); color: white; animation: blink 1s infinite; }
+        .status-warning { background: var(--accent-gold); color: black; }
+
+        /* Live Page */
+        .live-monitor { text-align: center; }
+        .big-timer { 
+            font-size: 7rem; font-weight: 900; font-family: 'Orbitron'; 
+            color: white; text-shadow: 0 0 50px var(--accent-cyan);
+            margin: 40px 0;
+        }
+        .live-ticker {
+            background: #000; color: var(--accent-green); padding: 15px;
+            border: 2px solid var(--accent-green); border-radius: 10px;
+            font-family: monospace; overflow: hidden; position: relative;
+        }
+        .ticker-move { display: inline-block; white-space: nowrap; animation: ticker 20s linear infinite; }
+        @keyframes ticker { 
+            from { transform: translateX(100%); }
+            to { transform: translateX(-100%); }
+        }
+
+        /* Decisions Page */
+        .decision-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
+        .decision-card {
+            background: rgba(188, 19, 254, 0.05); border: 1px solid var(--purple-neon);
+            border-radius: 20px; padding: 30px; position: relative; overflow: hidden;
+            transition: 0.4s;
+        }
+        .decision-card:hover { background: rgba(188, 19, 254, 0.15); transform: translateY(-10px); box-shadow: 0 0 30px var(--purple-neon); }
+        .decision-badge {
+            position: absolute; top: 15px; left: 15px; background: var(--purple-neon);
+            color: white; padding: 5px 15px; border-radius: 50px; font-size: 0.7rem; font-weight: 900;
+        }
+        .decision-card h3 { font-size: 2rem; margin: 20px 0 10px; color: var(--purple-neon); font-weight: 900; }
+        .decision-text { line-height: 1.6; color: #eee; font-size: 1.1rem; }
+
+        /* Elite Room */
+        .cyber-box {
+            background: rgba(0, 255, 65, 0.02); border: 1px solid var(--accent-green);
+            padding: 40px; border-radius: 5px; font-family: monospace;
+            box-shadow: inset 0 0 30px rgba(0, 255, 65, 0.1);
+        }
+        .command-line { color: var(--accent-green); margin-bottom: 10px; display: block; }
+        .command-line::before { content: "> "; }
+        .cyber-btn {
+            display: block; width: 100%; padding: 20px; margin-top: 20px;
+            border: 1px solid var(--accent-green); color: var(--accent-green);
+            text-align: center; text-decoration: none; font-weight: bold;
+            transition: 0.3s; background: transparent;
+        }
+        .cyber-btn:hover { background: var(--accent-green); color: black; box-shadow: 0 0 20px var(--accent-green); }
+
+        /* --- WEATHER PAGE STYLES --- */
+        .weather-display-container {
+            display: flex; flex-direction: column; align-items: center; text-align: center;
+        }
+        .weather-main-circle {
+            width: 280px; height: 280px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(0,242,255,0.1) 0%, rgba(0,0,0,0) 70%);
+            border: 2px solid var(--accent-cyan);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            box-shadow: 0 0 50px rgba(0,242,255,0.2);
+            animation: pulse-gold 4s infinite alternate;
+            margin-bottom: 40px;
+            backdrop-filter: blur(5px);
+        }
+        .weather-temp { font-size: 5rem; font-weight: 900; color: white; font-family: 'Orbitron'; line-height: 1; }
+        .weather-desc { font-size: 1.5rem; color: var(--accent-cyan); margin-top: 10px; }
+        
+        .weather-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px; width: 100%; max-width: 900px;
+        }
+        .weather-stat-card {
+            background: rgba(255,255,255,0.05); padding: 20px; border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.1); text-align: center;
+        }
+        .w-icon { font-size: 2rem; margin-bottom: 10px; display: block; }
+        .w-val { font-size: 1.5rem; font-weight: bold; color: var(--accent-gold); font-family: 'Orbitron'; }
+        .w-label { color: #aaa; font-size: 0.9rem; }
+
+        .field-status {
+            margin-top: 40px; padding: 20px; width: 100%; max-width: 900px;
+            border: 1px dashed var(--danger); background: rgba(255, 0, 64, 0.05);
+            color: var(--danger); font-weight: bold; font-size: 1.2rem;
+            text-align: center; border-radius: 10px;
+        }
+
+        /* --- 6. Mobile Responsiveness --- */
+        @media (max-width: 768px) {
+            .glitch-text { font-size: 3.5rem; }
+            .battle-grid { grid-template-columns: 1fr; }
+            .vs-divider { transform: rotate(90deg); margin: 20px 0; font-size: 3.5rem; }
+            .big-timer { font-size: 3.5rem; }
+            .nav-grid { grid-template-columns: 1fr; }
+            .warrior-card { font-size: 1.1rem; }
+            .weather-main-circle { width: 200px; height: 200px; }
+            .weather-temp { font-size: 3.5rem; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="bootScreen">
+        <div class="boot-text-container" id="bootText"></div>
+    </div>
+
+    <div class="scanlines"></div>
+    <canvas id="matrixCanvas"></canvas>
+    <canvas id="particlesCanvas"></canvas>
+    <canvas id="starCanvas"></canvas>
+
+    <!-- Home Button returns to main menu -->
+    <div class="home-btn" id="homeBtn" onclick="navigateTo('home')">🏠</div>
+
+    <div id="homePage" class="page active">
+        <div class="brand-header">
+            <span class="year-tag">EST 2026 • VERSION 2.7</span>
+            <h1 class="glitch-text" data-text="تأمـــين">تأمـــين</h1>
+        </div>
+
+        <div class="nav-grid">
+            <div class="menu-card premium-card" onclick="navigateTo('warriors')">
+                <span class="card-icon">⚔️</span>
+                <h2>صدام الجبابرة</h2>
+                <p>قائمة فرق المواجهة القادمة (5 ضد 5). ادخل وشوف مين معك ومين ضدك في الملحمة.</p>
+            </div>
+
+            <div class="menu-card" onclick="navigateTo('weather')" style="border-color: var(--accent-cyan);">
+                <span class="card-icon" style="color: var(--accent-cyan);">🌦️</span>
+                <h2 style="color: var(--accent-cyan);">أرصاد الميدان</h2>
+                <p>حالة الطقس الحالية، سرعة الرياح، ونسبة انزلاق اللاعبين المتوقعة.</p>
+            </div>
+
+            <div class="menu-card" onclick="navigateTo('decisions')" style="border-color: var(--purple-neon);">
+                <span class="card-icon" style="color: var(--purple-neon);">⚖️</span>
+                <h2 style="color: var(--purple-neon);">محكمة الميدان</h2>
+                <p>تحليل الأداء، الفضائح الكروية، وقرارات الهيئة العليا بخصوص "اللعب" الكروي.</p>
+            </div>
+
+            <div class="menu-card" onclick="navigateTo('stats')">
+                <span class="card-icon">📊</span>
+                <h2>رادار الملاعب</h2>
+                <p>تحليل شامل للأهداف، التمريرات الحاسمة، ونسبة "التخويت" في كل مباراة.</p>
+            </div>
+
+            <div class="menu-card" onclick="navigateTo('injuries')">
+                <span class="card-icon">🩺</span>
+                <h2>الطب الرياضي</h2>
+                <p>قائمة الإصابات، المتمارضين، وتقرير الحالة البدنية قبل صافرة البداية.</p>
+            </div>
+
+            <div class="menu-card" onclick="navigateTo('live')">
+                <span class="card-icon">📡</span>
+                <h2>مركز البيانات</h2>
+                <p>تغطية حية وتوقيت المباراة القادمة (الجمعة 17:00 - 18:00).</p>
+            </div>
+
+            <div class="menu-card" onclick="navigateTo('elite')">
+                <span class="card-icon">🕵️‍♂️</span>
+                <h2>غرفة النخبة</h2>
+                <p>الدخول مسموح فقط للمستخدم. قنوات اتصال مشفرة وروابط سرية.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Weather Page -->
+    <div id="weatherPage" class="page">
+        <h2 style="text-align: center; font-size: 3rem; margin-bottom: 40px; color: var(--accent-cyan); font-family: 'Orbitron';">⛈️ أرصاد الميدان</h2>
+        
+        <div class="weather-display-container">
+            <div id="loadingWeather" style="color: var(--accent-green); margin-bottom: 20px;">جاري الاتصال بالقمر الصناعي...</div>
+            
+            <div class="weather-main-circle" id="weatherCircle" style="display:none;">
+                <div class="weather-temp" id="wTemp">--°</div>
+                <div class="weather-desc" id="wDesc">--</div>
+            </div>
+
+            <div class="weather-grid" id="weatherGrid" style="display:none;">
+                <div class="weather-stat-card">
+                    <span class="w-icon">💨</span>
+                    <div class="w-val" id="wWind">--</div>
+                    <div class="w-label">سرعة الرياح (كم/س)</div>
+                </div>
+                <div class="weather-stat-card">
+                    <span class="w-icon">💧</span>
+                    <div class="w-val" id="wHum">--%</div>
+                    <div class="w-label">الرطوبة</div>
+                </div>
+                <div class="weather-stat-card">
+                    <span class="w-icon">🌡️</span>
+                    <div class="w-val" id="wFeel">--°</div>
+                    <div class="w-label">الحرارة المحسوسة</div>
+                </div>
+            </div>
+
+            <div class="field-status" id="fieldStatus" style="display:none;">
+                ⚠️ تحليل النظام: الأرضية قد تكون زلقة، يرجى الحذر من "الكعوب" الفاشلة.
+            </div>
+        </div>
+    </div>
+
+    <div id="warriorsPage" class="page">
+        <h2 style="text-align: center; font-size: 3rem; margin-bottom: 40px; color: var(--accent-gold); font-family: 'Orbitron';">🛡️ الديربي ⚔️</h2>
+        
+        <div class="vs-arena">
+            <div class="battle-grid">
+                <div class="warrior-list team-left" id="team1List">
+                    </div>
+
+                <div class="vs-divider">VS</div>
+
+                <div class="warrior-list team-right" id="team2List">
+                    </div>
+            </div>
+
+            <div class="stats-box" style="width: 100%; max-width: 600px; text-align: center; border-color: var(--accent-gold);">
+                <p style="color: var(--accent-gold); font-weight: 800; font-size: 1.2rem;">موقع المعركة: سيدات الخليل</p>
+                <p style="margin-top: 10px; color: #888;">الأنظمة تراقب كل تمريرة، الغلطة هون بـ "هدف".</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="decisionsPage" class="page">
+        <h2 style="text-align: center; font-size: 3rem; margin-bottom: 40px; color: var(--purple-neon); font-family: 'Orbitron';">⚖️ محكمة الميدان</h2>
+        
+        <div class="decision-grid">
+            <div class="decision-card">
+                <span class="decision-badge">أفضل لاعب</span>
+                <h3>كريم "السفاح"</h3>
+                <p class="decision-text">بناءً على الأداء الخيالي في الجولة الماضية، تقرر منحه لقب "كابوس الحراس".</p>
+            </div>
+
+            <div class="decision-card" style="border-color: var(--danger);">
+                <span class="decision-badge" style="background: var(--danger);">تحت المراقبة</span>
+                <h3>محمد سكافي</h3>
+                <p class="decision-text">بسبب كثرة الإصابات الوهمية والغياب المتكرر، سكافي صار على "الرادار".</p>
+            </div>
+
+            <div class="decision-card" style="border-color: var(--accent-cyan);">
+                <span class="decision-badge" style="background: var(--accent-cyan); color: black;">المحرك الثابت</span>
+                <h3>عمر</h3>
+                <p class="decision-text">رئتين ما بتخلص.. تقرر رسمياً تحويله لفئة "جدار برلين".</p>
+            </div>
+          
+             <div class="decision-card" style="border-color: var(--accent-green);">
+                <span class="decision-badge" style="background: var(--accent-cyan); color: black;">الاكثر تسديداً</span>
+                <h3>محمد علي</h3>
+                <p class="decision-text">أقدام لا تهدأ... مراوغات وتسديدات كثيرة في المباراة الأخيرة.</p>
+            </div>
+
+            <div class="decision-card" style="border-color: var(--accent-gold);">
+                <span class="decision-badge" style="background: var(--accent-gold); color: black;">قانون التأمين</span>
+                <h3>المادة 101</h3>
+                <p class="decision-text">أي لاعب بيجي لابس "بوت اصابع" وهو مش عارف يلعب، رح يتم مصادرته للجمعية الخيرية.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="statsPage" class="page">
+        <h2 style="text-align: center; font-size: 3rem; margin-bottom: 40px; color: var(--accent-cyan); font-family: 'Orbitron';">📊 رادار اللاعبين</h2>
+        
+        <div class="stats-wrapper">
+            <div class="stats-box">
+                <h3 class="stats-title">فريق النخبة 🛡️</h3>
+                <table class="data-table" id="statsT1">
+                    </table>
+            </div>
+
+            <div class="stats-box">
+                <h3 class="stats-title" style="color: var(--danger);">فريق التحدي ⚔️</h3>
+                <table class="data-table" id="statsT2">
+                    </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="injuriesPage" class="page">
+        <h2 style="text-align: center; font-size: 3rem; margin-bottom: 40px; color: var(--danger); font-family: 'Orbitron';">🚑 MEDICAL REPORT</h2>
+        
+        <div id="injuryList">
+            <div class="injury-card">
+                <div class="player-info">
+                    <h3>محمد سكافي</h3>
+                    <p>إصابة في "الفخذ" (بطلنا نعرف أي فخذ فيهم)</p>
+                </div>
+                <span class="status-badge status-danger">غائب - شهرين</span>
+            </div>
+
+            <div class="injury-card" style="border-color: var(--accent-gold);">
+                <div class="player-info">
+                    <h3>مؤيد</h3>
+                    <p>شد عضلي ناتج عن "ركضة زيادة" بالغلط</p>
+                </div>
+                <span class="status-badge status-warning">مشكوك في أمره</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="livePage" class="page">
+        <div class="live-monitor">
+            <h2 style="color: var(--accent-cyan); font-family: 'Orbitron';">العداد التنازلي</h2>
+            <div class="big-timer" id="matchTimer">00:00:00:00</div>
+            
+            <div class="live-ticker">
+                <div class="ticker-move">
+                    ⚠️ تنبيه: الحجز القادم يوم الجمعة 17:00 • التواجد قبل 10 دقائق إلزامي • يمنع اصطحاب الأعذار الطبية • الأنظمة تعمل بكفاءة عالية • فريق النخبة جاهز بنسبة 99% •
+                </div>
+            </div>
+
+            <div class="stats-box" style="margin-top: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <h4 style="color: var(--accent-cyan);">نسبة الاستحواذ المتوقعة</h4>
+                    <p style="font-size: 2rem; font-weight: 900;">68%</p>
+                </div>
+                <div>
+                    <h4 style="color: var(--danger);">قوة هجوم الخصم</h4>
+                    <p style="font-size: 2rem; font-weight: 900;">43%</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="elitePage" class="page">
+        <h2 style="text-align: center; font-size: 3rem; margin-bottom: 40px; color: var(--accent-green); font-family: 'Orbitron';">🕵️‍♂️ ELITE COMMAND CENTER</h2>
+        
+        <div class="cyber-box">
+            <span class="command-line">Initializing secure connection...</span>
+            <span class="command-line">Bypassing firewalls...</span>
+            <span class="command-line">Accessing TAMIN_CORE_DB...</span>
+            <span class="command-line" style="color: white; font-weight: bold;">أهلاً بك أيها الفقير. القنوات مفتوحة الآن:</span>
+            
+            <div style="margin-top: 30px;">
+                <a href="https://chat.whatsapp.com/G56D1vR2V2f7X6" target="_blank" class="cyber-btn">
+                    [ انضمام لمجموعة النخبة (WhatsApp) ]
+                </a>
+                <a href="https://wa.me/972594054750" target="_blank" class="cyber-btn" style="border-color: #888; color: #888;">
+                    [ تواصل مباشر مع المسؤول المشفر ]
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. CONFIGURATION & DATA ---
+        const playersTeam1 = [
+            { name: "عمر", goals: 1, assists: 2, rating: 9.0 },
+            { name: "يوسف", goals: 2, assists: 1, rating: 8.3 },
+            { name: "كريم", goals: 4, assists: 3, rating: 9.8 },
+            { name: "عمرو", goals: 0, assists: 0, rating: 6.0 },
+            { name: "محمد", goals: 0, assists: 0, rating: 6.0 }
+        ];
+
+        const playersTeam2 = [
+            { name: "مؤيد", goals: 0, assists: 0, rating: 6.0 },
+            { name: "قصي", goals: 0, assists: 0, rating: 6.0 },
+            { name: "محمد", goals: 0, assists: 0, rating: 6.0 },
+            { name: "قواسمة", goals: 0, assists: 0, rating: 6.0 },
+            { name: "عابدين", goals: 0, assists: 0, rating: 6.0 }
+        ];
+
+        // --- 2. BOOT SEQUENCE ---
+        const bootMessages = [
+            "TAMIN_OS v2.6.0 loading...",
+            "Connecting to Global Satellite Link...",
+            "Analyzing Player Performance Data...",
+            "Weather Satellites: ONLINE...",
+            "Overriding System Protocols...",
+            "Elite Room: ACCESS GRANTED.",
+            "Welcome to the Future of Tamin."
+        ];
+
+        function runBoot() {
+            const container = document.getElementById('bootText');
+            let i = 0;
+            
+            function addMessage() {
+                if (i < bootMessages.length) {
+                    const p = document.createElement('p');
+                    p.innerHTML = `<span class="command-line">${bootMessages[i]}</span>`;
+                    container.appendChild(p);
+                    i++;
+                    setTimeout(addMessage, Math.random() * 400 + 100);
+                } else {
+                    setTimeout(() => {
+                        document.getElementById('bootScreen').style.opacity = '0';
+                        setTimeout(() => {
+                            document.getElementById('bootScreen').style.display = 'none';
+                        }, 500);
+                    }, 800);
+                }
+            }
+            addMessage();
+        }
+
+        // --- 3. WEATHER SYSTEM (LIVE API) ---
+        async function fetchWeather() {
+            // Using Open-Meteo API for Hebron (Approx Coords: 31.53, 35.09)
+            // No API Key needed, safe for static HTML
+            const url = "https://api.open-meteo.com/v1/forecast?latitude=31.53&longitude=35.09&current=temperature_2m,relative_humidity_2m,apparent_temperature,wind_speed_10m&timezone=auto";
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if(data.current) {
+                    const current = data.current;
+                    document.getElementById('loadingWeather').style.display = 'none';
+                    document.getElementById('weatherCircle').style.display = 'flex';
+                    document.getElementById('weatherGrid').style.display = 'grid';
+                    document.getElementById('fieldStatus').style.display = 'block';
+
+                    document.getElementById('wTemp').innerText = Math.round(current.temperature_2m) + "°";
+                    document.getElementById('wWind').innerText = current.wind_speed_10m;
+                    document.getElementById('wHum').innerText = current.relative_humidity_2m + "%";
+                    document.getElementById('wFeel').innerText = Math.round(current.apparent_temperature) + "°";
+
+                    // Smart Description
+                    let desc = "أجواء مثالية";
+                    let fieldMsg = "⚠️ حالة الملعب: ممتاز، لا يوجد أعذار للخسارة.";
+                    
+                    if(current.temperature_2m < 10) {
+                         desc = "بارد جداً";
+                         fieldMsg = "⚠️ تحذير: تجمد الأطراف محتمل. الإحماء الجيد ضروري.";
+                    } else if (current.temperature_2m > 30) {
+                        desc = "حارق خارق";
+                        fieldMsg = "⚠️ تحذير: استهلاك المياه سيكون مرتفعاً. لا تنسوا قناني المي.";
+                    }
+                    
+                    if(current.wind_speed_10m > 15) {
+                        desc += " / عاصف";
+                        fieldMsg = "⚠️ تحذير: الكرات العالية رح تروح ع الشارع.";
+                    }
+
+                    document.getElementById('wDesc').innerText = desc;
+                    document.getElementById('fieldStatus').innerText = fieldMsg;
+                }
+            } catch (error) {
+                console.error("Weather Error", error);
+                document.getElementById('loadingWeather').innerText = "خطأ في الاتصال بالأقمار الصناعية (Mock Data Activated)";
+                // Fallback Mock Data
+                document.getElementById('wTemp').innerText = "19°";
+                document.getElementById('wDesc').innerText = "بيانات تجريبية";
+            }
+        }
+
+        // --- 4. NAVIGATION SYSTEM ---
+        function navigateTo(pageId) {
+            // Remove active from all pages
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            
+            // Add active to target
+            const targetPage = document.getElementById(pageId + 'Page');
+            if(targetPage) targetPage.classList.add('active');
+
+            // Handle backgrounds & home button
+            const homeBtn = document.getElementById('homeBtn');
+            const particles = document.getElementById('particlesCanvas');
+            const matrix = document.getElementById('matrixCanvas');
+            const stars = document.getElementById('starCanvas');
+
+            // Reset backgrounds
+            if(particles) particles.style.display = 'none';
+            if(matrix) matrix.style.display = 'none';
+            if(stars) stars.style.display = 'none';
+            stopMatrix();
+
+            if (pageId === 'home') {
+                homeBtn.style.display = 'none';
+                if(particles) particles.style.display = 'block';
+            } else {
+                homeBtn.style.display = 'flex'; // Show Home Button for all subpages
+                
+                if (pageId === 'elite') {
+                    if(matrix) matrix.style.display = 'block';
+                    initMatrix();
+                } else if (pageId === 'warriors') {
+                    if(stars) stars.style.display = 'block';
+                    initStars(); // Assuming logic exists or handled by CSS
+                } else if (pageId === 'weather') {
+                    if(stars) stars.style.display = 'block'; // Weather looks cool with stars
+                    fetchWeather(); // Fetch weather when page opens
+                } else {
+                    if(particles) particles.style.display = 'block';
+                }
+            }
+            window.scrollTo(0,0);
+        }
+
+        // --- 5. RENDER DATA ---
+        function renderContent() {
+            // Warriors Lists
+            const t1List = document.getElementById('team1List');
+            const t2List = document.getElementById('team2List');
+            
+            t1List.innerHTML = playersTeam1.map(p => 
+                `<div class="warrior-card">
+                    <span>🛡️</span>
+                    <span>${p.name}</span>
+                </div>`
+            ).join('');
+
+            t2List.innerHTML = playersTeam2.map(p => 
+                `<div class="warrior-card">
+                    <span>${p.name}</span>
+                    <span>⚔️</span>
+                </div>`
+            ).join('');
+
+            // Stats Tables
+            const sT1 = document.getElementById('statsT1');
+            const sT2 = document.getElementById('statsT2');
+
+            sT1.innerHTML = `<tr><td>اللاعب</td><td>الأهداف</td><td>التقييم</td></tr>` + 
+                playersTeam1.map(p => 
+                `<tr>
+                    <td>${p.name}</td>
+                    <td>${p.goals}</td>
+                    <td>${p.rating}</td>
+                </tr>`
+            ).join('');
+
+            sT2.innerHTML = `<tr><td>اللاعب</td><td>الأهداف</td><td>التقييم</td></tr>` + 
+                playersTeam2.map(p => 
+                `<tr>
+                    <td>${p.name}</td>
+                    <td>${p.goals}</td>
+                    <td>${p.rating}</td>
+                </tr>`
+            ).join('');
+        }
+
+        // --- 6. TIMER LOGIC ---
+        function updateTimer() {
+            const now = new Date();
+            // Target: Next Friday 17:00
+            let target = new Date();
+            target.setDate(now.getDate() + (5 + 7 - now.getDay()) % 7);
+            target.setHours(17, 0, 0, 0);
+            
+            if (target <= now) target.setDate(target.getDate() + 7);
+
+            const diff = target - now;
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const secs = Math.floor((diff % (1000 * 60)) / 1000);
+
+            document.getElementById('matchTimer').innerText = 
+                `${String(days).padStart(2,'0')}:${String(hours).padStart(2,'0')}:${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+        }
+
+        // --- 7. BACKGROUND ANIMATIONS ---
+        
+        // Matrix (Elite Page)
+        let matrixInterval;
+        function initMatrix() {
+            const canvas = document.getElementById('matrixCanvas');
+            if(!canvas) return;
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            const chars = "TAMIN010101SKAFIMOYEDELITE2026";
+            const fontSize = 16;
+            const columns = canvas.width / fontSize;
+            const drops = [];
+            for (let i = 0; i < columns; i++) drops[i] = 1;
+
+            function draw() {
+                ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = "#00ff41";
+                ctx.font = fontSize + "px monospace";
+                for (let i = 0; i < drops.length; i++) {
+                    const text = chars.charAt(Math.floor(Math.random() * chars.length));
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                    drops[i]++;
+                }
+            }
+            if(matrixInterval) clearInterval(matrixInterval);
+            matrixInterval = setInterval(draw, 33);
+        }
+
+        function stopMatrix() {
+            if(matrixInterval) clearInterval(matrixInterval);
+        }
+
+        // Particle System (Home Page)
+        function initParticles() {
+            const canvas = document.getElementById('particlesCanvas');
+            if(!canvas) return;
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const particlesArray = [];
+            const numberOfParticles = 50;
+
+            class Particle {
+                constructor() {
+                    this.x = Math.random() * canvas.width;
+                    this.y = Math.random() * canvas.height;
+                    this.size = Math.random() * 3 + 1;
+                    this.speedX = Math.random() * 1 - 0.5;
+                    this.speedY = Math.random() * 1 - 0.5;
+                    this.color = '#00f2ff';
+                }
+                update() {
+                    this.x += this.speedX;
+                    this.y += this.speedY;
+                    if (this.size > 0.2) this.size -= 0.01;
+                    if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+                    if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+                }
+                draw() {
+                    ctx.fillStyle = this.color;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            function handleParticles() {
+                for (let i = 0; i < particlesArray.length; i++) {
+                    particlesArray[i].update();
+                    particlesArray[i].draw();
+                    if (particlesArray[i].size <= 0.3) {
+                        particlesArray.splice(i, 1);
+                        i--;
+                        particlesArray.push(new Particle());
+                    }
+                }
+            }
+            
+            // Fill Init
+            for(let i=0; i<numberOfParticles; i++){
+                particlesArray.push(new Particle());
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                handleParticles();
+                requestAnimationFrame(animate);
+            }
+            animate();
+        }
+        
+        // Stars (Warriors / Weather)
+        function initStars() {
+            const canvas = document.getElementById('starCanvas');
+            if(!canvas) return;
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            const stars = [];
+            for(let i=0; i<100; i++) {
+                stars.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    radius: Math.random() * 1.5,
+                    alpha: Math.random()
+                });
+            }
+            
+            function drawStars() {
+                ctx.clearRect(0,0, canvas.width, canvas.height);
+                ctx.fillStyle = "white";
+                stars.forEach(star => {
+                    ctx.globalAlpha = star.alpha;
+                    ctx.beginPath();
+                    ctx.arc(star.x, star.y, star.radius, 0, Math.PI*2);
+                    ctx.fill();
+                    star.alpha += (Math.random() - 0.5) * 0.05;
+                    if(star.alpha < 0) star.alpha = 0;
+                    if(star.alpha > 1) star.alpha = 1;
+                });
+                requestAnimationFrame(drawStars);
+            }
+            drawStars();
+        }
+
+        // --- 8. INITIALIZATION ---
+        window.onload = function() {
+            runBoot();
+            renderContent();
+            setInterval(updateTimer, 1000);
+            updateTimer();
+            initParticles();
+        };
+
+        window.onresize = function() {
+            // Resize logic could go here
+        }
+
+    </script>
+</body>
+</html>
